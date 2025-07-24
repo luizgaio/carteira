@@ -214,9 +214,10 @@ def download_data_optimized(tickers, start_date, end_date):
             st.error("❌ Nenhum dado encontrado para o período selecionado")
             return None, None
         
-        # Extrair preços de fechamento
+        # Extrair preços de fechamento - CORREÇÃO PRINCIPAL AQUI
         if len(all_tickers) == 1:
-            prices = pd.DataFrame({all_tickers[0]: data['Close']})
+            # Caso especial para um único ativo
+            prices = pd.DataFrame(data['Close']).rename(columns={'Close': all_tickers[0]})
         else:
             prices = data['Close']
         
