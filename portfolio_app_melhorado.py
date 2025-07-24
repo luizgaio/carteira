@@ -696,7 +696,6 @@ def main():
     if not st.session_state.analyze:
         if st.button("🚀 Analisar Portfólio", type="primary", use_container_width=True):
             st.session_state.analyze = True
-            st.experimental_rerun()
         else:
             st.info("💡 Selecione os ativos e clique em 'Analisar Portfólio' para continuar")
             st.stop()
