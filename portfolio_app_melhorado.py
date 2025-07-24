@@ -911,7 +911,7 @@ def main():
     st.markdown("""
     <div style='text-align: center; color: #666;'>
         <p><strong>Análise de Portfólio Avançada</strong></p>
-        <p>Desenvolvido para fins educacionais | Versão 2.0</p>
+        <p>Desenvolvido pelo Prof. Luiz Eduardo Gaio para fins educacionais | Versão 2.0</p>
         <p><em>⚠️ Esta ferramenta é apenas para fins educacionais. Não constitui recomendação de investimento.</em></p>
     </div>
     """, unsafe_allow_html=True)
