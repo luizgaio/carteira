@@ -629,6 +629,12 @@ def main():
     # Inicializa variáveis de sessão
     if 'analyze' not in st.session_state:
         st.session_state.analyze = False
+        st.session_state.prevent_early_processing = True  # ← Nova variável
+
+    # Sai imediatamente se não for interação do usuário
+    if st.session_state.prevent_early_processing:
+        st.session_state.prevent_early_processing = False
+        return
     
     # Sidebar com parâmetros
     with st.sidebar:
@@ -694,7 +700,9 @@ def main():
         # Botão para iniciar análise
         if st.button("🚀 Analisar Portfólio", type="primary", use_container_width=True):
             st.session_state.analyze = True
-
+            st.session_state.prevent_early_processing = False  # ← Permite processamento
+            st.experimental_rerun()  # ← Força a reexecução
+                
     # Só continua se o botão foi clicado
     if not st.session_state.get('analyze', False):
         st.info("💡 Selecione os ativos e clique em 'Analisar Portfólio' para continuar")
