@@ -51,6 +51,13 @@ st.markdown("""
         margin: 0.2rem;
         border-left: 4px solid #1f4e79;
     }
+    .big-button {
+        font-size: 1.2rem;
+        padding: 0.7rem 1.5rem;
+        margin: 1rem auto;
+        display: block;
+        width: 80%;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -619,6 +626,9 @@ Calmar Ratio: {portfolio_metrics['calmar_ratio']:.2f}
 
 def main():
     """Função principal do aplicativo"""
+    # Inicializa variáveis de sessão
+    if 'analyze' not in st.session_state:
+        st.session_state.analyze = False
     
     # Sidebar com parâmetros
     with st.sidebar:
@@ -677,10 +687,18 @@ def main():
     
     # Seleção de ativos
     selected_assets = create_asset_selector()
-    
+
     if not selected_assets or len(selected_assets) < 2:
         st.warning("⚠️ Selecione pelo menos 2 ativos para análise")
-        st.stop()  # Isso para a execução aqui de forma mais limpa
+    else:
+        # Botão para iniciar análise
+        if st.button("🚀 Analisar Portfólio", type="primary", use_container_width=True):
+            st.session_state.analyze = True
+
+    # Só continua se o botão foi clicado
+    if not st.session_state.get('analyze', False):
+        st.info("💡 Selecione os ativos e clique em 'Analisar Portfólio' para continuar")
+        st.stop()
     
     if len(selected_assets) > 15:
         st.warning("⚠️ Muitos ativos podem impactar a performance. Considere reduzir para menos de 15.")
