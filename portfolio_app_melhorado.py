@@ -690,17 +690,16 @@ def main():
 
     if not selected_assets or len(selected_assets) < 2:
         st.warning("⚠️ Selecione pelo menos 2 ativos para análise")
-    else:
-        # Botão para iniciar análise
+        st.stop()
+
+    # Exibe botão e espera o clique
+    if not st.session_state.analyze:
         if st.button("🚀 Analisar Portfólio", type="primary", use_container_width=True):
             st.session_state.analyze = True
-            st.session_state.prevent_early_processing = False  # ← Permite processamento
-            st.experimental_rerun()  # ← Força a reexecução
-                
-    # Só continua se o botão foi clicado
-    if not st.session_state.get('analyze', False):
-        st.info("💡 Selecione os ativos e clique em 'Analisar Portfólio' para continuar")
-        st.stop()
+            st.experimental_rerun()
+        else:
+            st.info("💡 Selecione os ativos e clique em 'Analisar Portfólio' para continuar")
+            st.stop()
     
     if len(selected_assets) > 15:
         st.warning("⚠️ Muitos ativos podem impactar a performance. Considere reduzir para menos de 15.")
