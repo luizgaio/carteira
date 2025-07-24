@@ -126,6 +126,10 @@ def create_asset_selector():
     assets_by_sector = get_assets_by_sector()
     preset_portfolios = get_preset_portfolios()
     
+    # Inicializa a sessão para armazenar os ativos selecionados
+    if 'selected_assets' not in st.session_state:
+        st.session_state.selected_assets = []
+    
     # Abas para diferentes métodos de seleção
     tab1, tab2, tab3 = st.tabs(["🔍 Busca Manual", "📋 Portfólios Prontos", "🏢 Por Setor"])
     
@@ -144,43 +148,44 @@ def create_asset_selector():
             
             if filtered_assets:
                 asset_options = [f"{ticker} - {name}" for ticker, name in filtered_assets.items()]
-                selected_assets_display = st.multiselect("Ativos encontrados:", asset_options)
-                selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
+                selected_assets_display = st.multiselect(
+                    "Ativos encontrados:", 
+                    asset_options,
+                    default=[f"{a} - {all_assets[a]}" for a in st.session_state.selected_assets if a in all_assets]
+                )
+                st.session_state.selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
             else:
                 st.warning("Nenhum ativo encontrado para a busca.")
-                selected_assets = []
         else:
             # Seleção padrão
             default_assets = ["VALE3.SA", "PETR4.SA", "ITUB4.SA", "B3SA3.SA"]
             asset_options = [f"{ticker} - {all_assets[ticker]}" for ticker in default_assets]
-            selected_assets_display = st.multiselect("Selecione os ativos:", 
-                                                    [f"{ticker} - {name}" for ticker, name in all_assets.items()],
-                                                    default=asset_options)
-            selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
+            selected_assets_display = st.multiselect(
+                "Selecione os ativos:", 
+                [f"{ticker} - {name}" for ticker, name in all_assets.items()],
+                default=[f"{a} - {all_assets[a]}" for a in st.session_state.selected_assets if a in all_assets]
+            )
+            st.session_state.selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
     
     with tab2:
         # Portfólios pré-definidos
         st.markdown("Selecione um portfólio pré-configurado:")
         
         cols = st.columns(3)
-        selected_preset = None
         
         for i, (name, assets) in enumerate(preset_portfolios.items()):
             with cols[i % 3]:
                 if st.button(f"📊 {name}", key=f"preset_{i}"):
-                    selected_preset = assets
+                    st.session_state.selected_assets = assets
+                    st.success(f"Portfólio selecionado: {len(assets)} ativos")
         
-        if selected_preset:
-            selected_assets = selected_preset
-            st.success(f"Portfólio selecionado: {len(selected_assets)} ativos")
-            
-            # Mostrar ativos selecionados
-            for asset in selected_assets:
+        # Mostrar ativos selecionados se houver
+        if st.session_state.selected_assets:
+            st.markdown("**Ativos selecionados:**")
+            for asset in st.session_state.selected_assets:
                 asset_name = all_assets.get(asset, asset)
                 st.markdown(f"<div class='portfolio-preset'>• {asset} - {asset_name}</div>", 
                            unsafe_allow_html=True)
-        else:
-            selected_assets = []
     
     with tab3:
         # Seleção por setor
@@ -189,12 +194,14 @@ def create_asset_selector():
         if selected_sector:
             sector_assets = assets_by_sector[selected_sector]
             asset_options = [f"{ticker} - {name}" for ticker, name in sector_assets.items()]
-            selected_assets_display = st.multiselect(f"Ativos do setor {selected_sector}:", asset_options)
-            selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
-        else:
-            selected_assets = []
+            selected_assets_display = st.multiselect(
+                f"Ativos do setor {selected_sector}:", 
+                asset_options,
+                default=[f"{a} - {sector_assets[a]}" for a in st.session_state.selected_assets if a in sector_assets]
+            )
+            st.session_state.selected_assets = [asset.split(" - ")[0] for asset in selected_assets_display]
     
-    return selected_assets
+    return st.session_state.selected_assets
 
 @st.cache_data(ttl=3600, show_spinner="📥 Baixando dados do mercado...")
 def download_data_optimized(tickers, start_date, end_date):
@@ -671,9 +678,9 @@ def main():
     # Seleção de ativos
     selected_assets = create_asset_selector()
     
-    if len(selected_assets) < 2:
+    if not selected_assets or len(selected_assets) < 2:
         st.warning("⚠️ Selecione pelo menos 2 ativos para análise")
-        return
+        st.stop()  # Isso para a execução aqui de forma mais limpa
     
     if len(selected_assets) > 15:
         st.warning("⚠️ Muitos ativos podem impactar a performance. Considere reduzir para menos de 15.")
