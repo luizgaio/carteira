@@ -629,6 +629,7 @@ def main():
     # Inicializa variáveis de sessão
     if 'analyze' not in st.session_state:
         st.session_state.analyze = False
+        st.stop()
     
     # Sidebar com parâmetros
     with st.sidebar:
