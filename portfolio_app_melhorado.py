@@ -629,12 +629,6 @@ def main():
     # Inicializa variáveis de sessão
     if 'analyze' not in st.session_state:
         st.session_state.analyze = False
-        st.session_state.prevent_early_processing = True  # ← Nova variável
-
-    # Sai imediatamente se não for interação do usuário
-    if st.session_state.prevent_early_processing:
-        st.session_state.prevent_early_processing = False
-        return
     
     # Sidebar com parâmetros
     with st.sidebar:
